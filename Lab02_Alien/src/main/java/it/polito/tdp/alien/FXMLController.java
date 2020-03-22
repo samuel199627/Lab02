@@ -1,6 +1,7 @@
 package it.polito.tdp.alien;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.model.AlienDictionary;
@@ -9,6 +10,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+
+//in questa seconda versione ho sempr tenuto che al massimo due parole potessero essere scritte per aggiungere al dizionario, ma per una
+//parola aliena gia' inserita allora andiamo aggiungere la nuova traduzione anche alla precedente
 
 public class FXMLController {
 	
@@ -65,8 +69,13 @@ public class FXMLController {
     	String[] insertWordSplitted=insertWord.split(" ");
     	if(insertWordSplitted.length==1 && !insertWordSplitted[0].equals("")) {
     		System.out.println("\nHAI INSERITO UNA PAROLA, PROCEDO NEL TRADURLA...\n");
-    		String stampa=dictionary.translateWord(insertWordSplitted[0]);
-    		if(stampa!=null) {
+    		List<String> stampaList=dictionary.translateWord(insertWordSplitted[0]);
+    		String stampa="\n";
+    		
+    		if(stampaList!=null) {
+    			for(String trans:stampaList) {
+    				stampa=stampa+", "+trans;
+    			}
     			translateArea.appendText(""+stampa+"\n");
     		}
     		else {

@@ -1,15 +1,18 @@
 package it.polito.tdp.model;
 
-public class Word {
+import java.util.LinkedList;
+import java.util.List;
+
+public class WordEnhanced {
 	
 	private String AlienWord;
-	private String TransalteWord;
+	private List<String> translateWord;
 	
 	
-	public Word(String alienWord, String transalteWord) {
+	public WordEnhanced(String alienWord) {
 		super();
 		AlienWord = alienWord;
-		TransalteWord = transalteWord;
+		this.translateWord = new LinkedList<>();
 	}
 	public String getAlienWord() {
 		return AlienWord;
@@ -17,11 +20,11 @@ public class Word {
 	public void setAlienWord(String alienWord) {
 		AlienWord = alienWord;
 	}
-	public String getTransalteWord() {
-		return TransalteWord;
+	public List getTransalteWord() {
+		return translateWord;
 	}
-	public void setTransalteWord(String transalteWord) {
-		TransalteWord = transalteWord;
+	public void addTransalteWord(String translateWord) {
+		this.translateWord.add(translateWord);
 	}
 	
 	public boolean equals(String word) {
