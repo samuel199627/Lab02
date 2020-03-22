@@ -1,7 +1,10 @@
 package it.polito.tdp.alien;
 
 import javafx.application.Application;
+
 import static javafx.application.Application.launch;
+
+import it.polito.tdp.model.AlienDictionary;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,10 +15,22 @@ public class EntryPoint extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        Parent root = FXMLLoader.load(getClass().getResource("/fxml/Scene.fxml"));
+    	
+    	AlienDictionary dizionario=new AlienDictionary();
+    	FXMLController controller;
+    	
+    	//ci recuperiamo un riferimento al controller e lo facciamo tramite il loader che va a vedere
+    	//qual'è il controller associato al file FXML
+    	FXMLLoader loader=new FXMLLoader(getClass().getResource("/fxml/Scene.fxml"));
+    	
+        Parent root = loader.load();
         
         Scene scene = new Scene(root);
         scene.getStylesheets().add("/styles/Styles.css");
+        
+        controller=loader.getController(); 
+    	controller.setModel(dizionario);
+    	
         
         stage.setTitle("JavaFX and Maven");
         stage.setScene(scene);
