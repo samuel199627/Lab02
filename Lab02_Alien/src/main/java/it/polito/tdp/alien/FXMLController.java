@@ -11,8 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-//in questa seconda versione ho sempr tenuto che al massimo due parole potessero essere scritte per aggiungere al dizionario, ma per una
-//parola aliena gia' inserita allora andiamo aggiungere la nuova traduzione anche alla precedente
+//in questa terza versione abbiamo la ricerca con wild card che contiene al massimo un solo carattere speciale ?
 
 public class FXMLController {
 	
@@ -21,6 +20,7 @@ public class FXMLController {
     //abbiamo quel controller non possiamo andare ad usufruire di un nuovo Dizionario. Quindi il dizionario non va creato
 	//in inizialize() ma deve essere fatto in entryPoint dove cosi' il controller e il moddelo restsno separati.
 	private AlienDictionary dictionary;
+	private int stampati;
 
     @FXML
     private ResourceBundle resources;
@@ -53,30 +53,109 @@ public class FXMLController {
     	//e quindi siamo nel caso in cui vogliamo aggiungere al dizionario, oppure se solo una parola è stata inserita e quindi
     	//dobbiamo solo tradurla
     	
+    	stampati=0;
+    	
     	String insertWord;
     	insertWord=insertArea.getText().toLowerCase();
     	
-    	//devo controllare se la parola inserita contiene solo lettere alfabetiche
-    	for(int c=0; c<insertWord.length();c++) {
-    		if(!Character.isLetter(insertWord.charAt(c)) && !Character.isSpace((Character) insertWord.charAt(c))) {
-    			System.out.println("\nLA STRINGA NON CONTIENE SOLO LETTERE!\n");
-    			return;
+    	//System.out.println(insertWord);
+    	String[] insertWordSplitted=insertWord.split(" ");
+    	//conta i punti interrogativi
+    	int contaQ=0;
+    	int posizioneQ=0;
+    	if(insertWordSplitted.length<3 && !insertWordSplitted[0].equals("")) {
+    		
+    		for(int i=0;i<insertWordSplitted.length;i++) {
+    			/*
+    			if(insertWordSplitted[i].contains("?") ) { //il punto interrogativo va bene solo quando devo tradurre
+    				if(i==1 || insertWordSplitted.length==2) {
+    					System.out.println("\nLA STRINGA CONTIENE PUNTO INTERROGATIVO, MA NON RISPETTA LE REGOLE!\n");
+	    				return;
+    				}
+    				//DEVO ANCHE CONTROLLARE IL CASO IN CUI HO INSERITO UNA SOLA PAROLA MA CON PIU' DI UN PUNTO INTERROGATIVO
+    				String[] verificaQ=insertWordSplitted[0].split("?");
+    				
+    				if(verificaQ.length!=2) {
+    					System.out.println("\nLA STRINGA CONTIENE PIU' DI UN PUNTO INTERROGATIVO E NON RISPETTA LE REGOLE!\n");
+	    				return;
+    				}
+    			}
+    			*/
+    			
+	    		//devo controllare se la parola inserita contiene solo lettere alfabetiche
+		    	for(int c=0; c<insertWordSplitted[i].length();c++) {
+		    		
+		    		if(!Character.isLetter(insertWordSplitted[i].charAt(c)) && !Character.isSpace((Character) insertWordSplitted[i].charAt(c))) {
+		    			//eventualmente potrebbero esserci punti interrogativi, ma solo se ho una sola parola e se non ce ne sono piu' di uno
+		    			if(insertWordSplitted[i].charAt(c)=='?') {
+		    				posizioneQ=c;
+		    				contaQ++;
+		    				if(i==1 || insertWordSplitted.length==2) {
+		    					System.out.println("\nLA STRINGA CONTIENE PUNTO INTERROGATIVO, MA NON RISPETTA LE REGOLE!\n");
+			    				return;
+		    				}
+		    				if(contaQ>1) {
+		    					System.out.println("\nLA STRINGA CONTIENE PIU' DI UN PUNTO INTERROGATIVO E NON RISPETTA LE REGOLE!\n");
+			    				return;
+		    				}
+		    				
+		    				//se ne contiene solo uno e c'e' solo una stringa passa tutto indenne
+		    			}
+		    			else {
+		    				System.out.println("\nLA STRINGA NON CONTIENE SOLO LETTERE!\n");
+		    				return;
+		    			}
+		    			
+		    			
+		    		}
+		    		
+		    		
+		    	}
     		}
+    		
+    	
+    	}
+    	else {
+    		System.out.println("\nHAI INSERITO UN NUMERO ERRATO DI PAROLE, NON POSSO FARE NULLA!!\n");
+    		return;
     	}
     	
     	
-    	//System.out.println(insertWord);
-    	String[] insertWordSplitted=insertWord.split(" ");
+    	
     	if(insertWordSplitted.length==1 && !insertWordSplitted[0].equals("")) {
     		System.out.println("\nHAI INSERITO UNA PAROLA, PROCEDO NEL TRADURLA...\n");
-    		List<String> stampaList=dictionary.translateWord(insertWordSplitted[0]);
-    		String stampa="\n";
+    		List<List<String>> stampaList;
+    		
+    		if(contaQ>0) {
+    			System.out.println("\nATTENZIONE, RICERCA WILDCARD...\n");
+    			stampaList=dictionary.translateWordQ(insertWordSplitted[0],posizioneQ);
+    		}
+    		else {
+    			stampaList=dictionary.translateWord(insertWordSplitted[0]);
+    		}
+    		
+    		
     		
     		if(stampaList!=null) {
-    			for(String trans:stampaList) {
-    				stampa=stampa+", "+trans;
+    			for(List<String> lista:stampaList) {
+    				System.out.println("\nCORRISPONDENZA STAMPA:\n");
+    				String stampa="";
+    				
+	    			for(String trans:lista) {
+	    				
+	    				if(stampati==0) {
+	    					stampa=trans;
+	    					stampati++;
+	    				}
+	    				else {
+	    					stampa=stampa+", "+trans;
+	    				}
+	    				
+	    			}
+	    			stampa=stampa+"\n";
+	    			translateArea.appendText(""+stampa+"\n");
     			}
-    			translateArea.appendText(""+stampa+"\n");
+    			
     		}
     		else {
     			System.out.println("PAROLA NON ANCORA PRESENTE NEL DIZIONARIO, PERTANTO IMPOSSIBILE DA TRADURRE\n");
@@ -87,10 +166,6 @@ public class FXMLController {
     		System.out.println("\nHAI INSERITO DUE PAROLE, PROCEDO NELL' AGGIUNGERLA...");
     		dictionary.addWord(insertWordSplitted[0], insertWordSplitted[1]);
     		System.out.println("AGGIUNTA!\n");
-    	}
-    	else {
-    		System.out.println("\nHAI INSERITO UN NUMERO ERRATO DI PAROLE, NON POSSO FARE NULLA!!\n");
-    		return;
     	}
 
     }
